@@ -9,10 +9,21 @@ class ArrayMap extends Phaser.Scene {
     preload() {
         this.load.path = "./assets/";
 
+        // Load base and transition tiles
         this.load.image('water', 'water.png');
         this.load.image('land', 'land.png');
         this.load.image('tree', 'tree.png');
         this.load.image('building', 'building.png');
+
+        // Load transition tiles for different water/land configurations
+        this.load.image('water_left', 'water_left.png');           // Water on the left
+        this.load.image('water_right', 'water_right.png');         // Water on the right
+        this.load.image('water_top', 'water_top.png');             // Water above
+        this.load.image('water_bottom', 'water_bottom.png');       // Water below
+        this.load.image('water_top_left', 'water_top_left.png');   // Water above and left
+        this.load.image('water_top_right', 'water_top_right.png'); // Water above and right
+        this.load.image('water_bottom_left', 'water_bottom_left.png'); // Water below and left
+        this.load.image('water_bottom_right', 'water_bottom_right.png'); // Water below and right
     }
 
     create() {
@@ -34,7 +45,7 @@ class ArrayMap extends Phaser.Scene {
             }))
         );
 
-        // Main loop: Observe and Propagate until grid is collapsed
+        // Main loop:
         while (this.hasUncollapsedTiles()) {
             const tile = this.observe();
             this.propagate(tile);
