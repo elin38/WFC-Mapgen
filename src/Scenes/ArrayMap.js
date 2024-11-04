@@ -15,7 +15,7 @@ class ArrayMap extends Phaser.Scene {
         this.load.image('land', 'land.png');
         this.load.image('tree', 'tree.png');
         this.load.image('building', 'building.png');
-        this.load.image('tempTile', 'transition.png');
+        this.load.image('tempTile', 'monstrosity.png');
     }
 
     create() {
