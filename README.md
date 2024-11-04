@@ -22,3 +22,5 @@ This project is a **tile-based map generator** built with **Phaser.js** that use
 ## Acknowledgments
 
 This project was built with the help of **ChatGPT** for guidance on implementing the Wave Function Collapse algorithm in Phaser.js.
+
+## View using Github Pages
