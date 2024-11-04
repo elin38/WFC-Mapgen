@@ -2,8 +2,8 @@ class ArrayMap extends Phaser.Scene {
     constructor() {
         super("arrayMapScene");
         this.gridWidth = 20;
-        this.gridHeight = 15;
-        this.tileSize = 64;  // Using 64x64 tiles
+        this.gridHeight = 20;
+        this.tileSize = 32;  // Using 64x64 tiles
     }
 
     preload() {
@@ -14,21 +14,7 @@ class ArrayMap extends Phaser.Scene {
         this.load.image('land', 'land.png');
         this.load.image('tree', 'tree.png');
         this.load.image('building', 'building.png');
-<<<<<<< HEAD
-
-        this.load.image('tempTest', 'transition.png');
-
-        // Load transition tiles for different water/land configurations
-        this.load.image('water_left', 'water_left.png');           // Water on the left
-        this.load.image('water_right', 'water_right.png');         // Water on the right
-        this.load.image('water_top', 'water_top.png');             // Water above
-        this.load.image('water_bottom', 'water_bottom.png');       // Water below
-        this.load.image('water_top_left', 'water_top_left.png');   // Water above and left
-        this.load.image('water_top_right', 'water_top_right.png'); // Water above and right
-        this.load.image('water_bottom_left', 'water_bottom_left.png'); // Water below and left
-        this.load.image('water_bottom_right', 'water_bottom_right.png'); // Water below and right
-=======
->>>>>>> 7583130e86f84db29e129da5c67c96def0fffa0c
+        this.load.image('tempTile', 'transition.png');
     }
 
     create() {
@@ -46,37 +32,18 @@ class ArrayMap extends Phaser.Scene {
                 collapsed: false
             }))
         );
-<<<<<<< HEAD
-
-        // Main loop:
-        this.wfcLoopGeneration();
-
-        // Render generated map
-        //this.renderMap();
-        //this.addDecorations();
-    }
-
-    async wfcLoopGeneration () {
-=======
     
         this.generateTiles();
     }
     
     async generateTiles() {
->>>>>>> 7583130e86f84db29e129da5c67c96def0fffa0c
         while (this.hasUncollapsedTiles()) {
             const tile = this.observe();
             this.propagate(tile);
             this.renderMap();
-<<<<<<< HEAD
-            await this.wait(10);
-        }
-
-=======
-            await this.delay(10);
+            await this.delay(1);
         }
     
->>>>>>> 7583130e86f84db29e129da5c67c96def0fffa0c
         this.addDecorations();
     }
     
@@ -170,20 +137,17 @@ class ArrayMap extends Phaser.Scene {
 
         this.tiles.forEach((row, y) => {
             row.forEach((tile, x) => {
-<<<<<<< HEAD
+                let tileChoice;
                 if (tile.collapsed) {
-                    const tileType = tile.possibleTiles[0]; // Should be collapsed to one
-                    this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
+                    tileChoice = tile.possibleTiles[0];
                 }
                 else {
-                    const tileType = 'tempTest'; // Should be collapsed to one
-                    this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
+                    tileChoice = 'tempTile';
                 }
-=======
-                const tileType = tile.possibleTiles[0]; // Should be collapsed to one
+
+                const tileType = tileChoice; // Should be collapsed to one
                 const placedTile = this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
                 placedTile.setScale(0.5);
->>>>>>> 7583130e86f84db29e129da5c67c96def0fffa0c
             });
         });
     }
