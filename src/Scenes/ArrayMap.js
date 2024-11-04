@@ -2,63 +2,64 @@ class ArrayMap extends Phaser.Scene {
     constructor() {
         super("arrayMapScene");
         this.gridWidth = 20;
-        this.gridHeight = 15;
-        this.tileSize = 64;  // Using 64x64 tiles
+        this.gridHeight = 20;
+        this.tileSize = 32;
     }
 
     preload() {
         this.load.path = "./assets/";
 
-        // Load base and transition tiles
+        // Load base tiles
         this.load.image('water', 'water.png');
         this.load.image('land', 'land.png');
         this.load.image('tree', 'tree.png');
         this.load.image('building', 'building.png');
-
-        // Load transition tiles for different water/land configurations
-        this.load.image('water_left', 'water_left.png');           // Water on the left
-        this.load.image('water_right', 'water_right.png');         // Water on the right
-        this.load.image('water_top', 'water_top.png');             // Water above
-        this.load.image('water_bottom', 'water_bottom.png');       // Water below
-        this.load.image('water_top_left', 'water_top_left.png');   // Water above and left
-        this.load.image('water_top_right', 'water_top_right.png'); // Water above and right
-        this.load.image('water_bottom_left', 'water_bottom_left.png'); // Water below and left
-        this.load.image('water_bottom_right', 'water_bottom_right.png'); // Water below and right
     }
 
     create() {
-        // Generate initial map
         this.generateMap();
 
-        // Add key event for map regeneration
         this.input.keyboard.on('keydown-R', () => {
             this.generateMap();
         });
     }
 
     generateMap() {
-        // Initialize tile grid
         this.tiles = Array.from({ length: this.gridHeight }, () =>
             Array.from({ length: this.gridWidth }, () => ({
                 possibleTiles: ['water', 'land'],
                 collapsed: false
             }))
         );
-
-        // Main loop:
+    
+        this.generateTiles();
+    }
+    
+    async generateTiles() {
         while (this.hasUncollapsedTiles()) {
             const tile = this.observe();
             this.propagate(tile);
+            this.renderMap();
+            await this.delay(10);
         }
-
-        // Render generated map
-        this.renderMap();
+    
         this.addDecorations();
+    }
+    
+    delay(ms) {
+        return new Promise(resolve => this.time.delayedCall(ms, resolve));
     }
 
     // Checks if there are any uncollapsed tiles
     hasUncollapsedTiles() {
-        return this.tiles.some(row => row.some(tile => !tile.collapsed));
+        for (let row of this.tiles) {
+            for (let tile of row) {
+                if (!tile.collapsed) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // Observe function - Finds tile with lowest entropy and collapses it
@@ -97,14 +98,12 @@ class ArrayMap extends Phaser.Scene {
             const current = stack.pop();
             const tile = this.tiles[current.y][current.x];
 
-            // For each neighbor, reduce possible tiles based on this tile's constraints
             const neighbors = this.getNeighbors(current.x, current.y);
 
             neighbors.forEach(({ nx, ny }) => {
                 const neighborTile = this.tiles[ny][nx];
                 if (!neighborTile.collapsed) {
                     const newPossibleTiles = neighborTile.possibleTiles.filter((neighborType) => {
-                        // Allow both land and water neighbors
                         return true;
                     });
 
@@ -120,14 +119,13 @@ class ArrayMap extends Phaser.Scene {
     // Helper to get neighbors within bounds
     getNeighbors(x, y) {
         const neighbors = [];
-        if (x > 0) neighbors.push({ nx: x - 1, ny: y });
-        if (x < this.gridWidth - 1) neighbors.push({ nx: x + 1, ny: y });
-        if (y > 0) neighbors.push({ nx: x, ny: y - 1 });
-        if (y < this.gridHeight - 1) neighbors.push({ nx: x, ny: y + 1 });
+        if (x > 0) neighbors.push({ nx: x - 1, ny: y }); // left
+        if (x < this.gridWidth - 1) neighbors.push({ nx: x + 1, ny: y }); // right
+        if (y > 0) neighbors.push({ nx: x, ny: y - 1 }); // top
+        if (y < this.gridHeight - 1) neighbors.push({ nx: x, ny: y + 1 }); // bottom
         return neighbors;
     }
 
-    // Render the tile map based on the WFC results
     renderMap() {
         this.cameras.main.setBounds(0, 0, this.gridWidth * this.tileSize, this.gridHeight * this.tileSize);
         this.add.existing(this.cameras.main);
@@ -135,7 +133,8 @@ class ArrayMap extends Phaser.Scene {
         this.tiles.forEach((row, y) => {
             row.forEach((tile, x) => {
                 const tileType = tile.possibleTiles[0]; // Should be collapsed to one
-                this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
+                const placedTile = this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
+                placedTile.setScale(0.5);
             });
         });
     }
@@ -149,7 +148,8 @@ class ArrayMap extends Phaser.Scene {
 
             if (tile.possibleTiles[0] === 'land') {
                 const decoration = Phaser.Math.RND.pick(['tree', 'building']);
-                this.add.image(x * this.tileSize, y * this.tileSize, decoration).setOrigin(0);
+                const decorationImage = this.add.image(x * this.tileSize, y * this.tileSize, decoration).setOrigin(0);
+                decorationImage.setScale(0.5);
             }
         }
     }
