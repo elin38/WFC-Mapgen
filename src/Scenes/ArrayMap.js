@@ -15,6 +15,8 @@ class ArrayMap extends Phaser.Scene {
         this.load.image('tree', 'tree.png');
         this.load.image('building', 'building.png');
 
+        this.load.image('tempTest', 'transition.png');
+
         // Load transition tiles for different water/land configurations
         this.load.image('water_left', 'water_left.png');           // Water on the left
         this.load.image('water_right', 'water_right.png');         // Water on the right
@@ -46,14 +48,26 @@ class ArrayMap extends Phaser.Scene {
         );
 
         // Main loop:
+        this.wfcLoopGeneration();
+
+        // Render generated map
+        //this.renderMap();
+        //this.addDecorations();
+    }
+
+    async wfcLoopGeneration () {
         while (this.hasUncollapsedTiles()) {
             const tile = this.observe();
             this.propagate(tile);
+            this.renderMap();
+            await this.wait(10);
         }
 
-        // Render generated map
-        this.renderMap();
         this.addDecorations();
+    }
+
+    wait(time) {
+        return new Promise(resolve => setTimeout(resolve, time));
     }
 
     // Checks if there are any uncollapsed tiles
@@ -134,8 +148,14 @@ class ArrayMap extends Phaser.Scene {
 
         this.tiles.forEach((row, y) => {
             row.forEach((tile, x) => {
-                const tileType = tile.possibleTiles[0]; // Should be collapsed to one
-                this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
+                if (tile.collapsed) {
+                    const tileType = tile.possibleTiles[0]; // Should be collapsed to one
+                    this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
+                }
+                else {
+                    const tileType = 'tempTest'; // Should be collapsed to one
+                    this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
+                }
             });
         });
     }
