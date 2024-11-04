@@ -3,7 +3,8 @@ class ArrayMap extends Phaser.Scene {
         super("arrayMapScene");
         this.gridWidth = 20;
         this.gridHeight = 20;
-        this.tileSize = 32;  // Using 64x64 tiles
+        this.tileSize = 32;
+        this.tileContainer = null; 
     }
 
     preload() {
@@ -18,6 +19,7 @@ class ArrayMap extends Phaser.Scene {
     }
 
     create() {
+        this.tileContainer = this.add.container(0, 0);  // Create a container for tiles
         this.generateMap();
 
         this.input.keyboard.on('keydown-R', () => {
@@ -26,6 +28,8 @@ class ArrayMap extends Phaser.Scene {
     }
 
     generateMap() {
+        this.tileContainer.removeAll(true);
+
         this.tiles = Array.from({ length: this.gridHeight }, () =>
             Array.from({ length: this.gridWidth }, () => ({
                 possibleTiles: ['water', 'land'],
@@ -51,11 +55,6 @@ class ArrayMap extends Phaser.Scene {
         return new Promise(resolve => this.time.delayedCall(ms, resolve));
     }
 
-    wait(time) {
-        return new Promise(resolve => setTimeout(resolve, time));
-    }
-
-    // Checks if there are any uncollapsed tiles
     hasUncollapsedTiles() {
         for (let row of this.tiles) {
             for (let tile of row) {
@@ -72,7 +71,6 @@ class ArrayMap extends Phaser.Scene {
         let minEntropy = Infinity;
         let chosenTile = null;
 
-        // Find the tile with the minimum entropy (fewest options)
         for (let y = 0; y < this.gridHeight; y++) {
             for (let x = 0; x < this.gridWidth; x++) {
                 const tile = this.tiles[y][x];
@@ -132,22 +130,20 @@ class ArrayMap extends Phaser.Scene {
     }
 
     renderMap() {
-        this.cameras.main.setBounds(0, 0, this.gridWidth * this.tileSize, this.gridHeight * this.tileSize);
-        this.add.existing(this.cameras.main);
+        this.tileContainer.removeAll(true);
 
         this.tiles.forEach((row, y) => {
             row.forEach((tile, x) => {
                 let tileChoice;
                 if (tile.collapsed) {
                     tileChoice = tile.possibleTiles[0];
-                }
-                else {
+                } else {
                     tileChoice = 'tempTile';
                 }
 
-                const tileType = tileChoice; // Should be collapsed to one
-                const placedTile = this.add.image(x * this.tileSize, y * this.tileSize, tileType).setOrigin(0);
+                const placedTile = this.add.image(x * this.tileSize, y * this.tileSize, tileChoice).setOrigin(0);
                 placedTile.setScale(0.5);
+                this.tileContainer.add(placedTile);
             });
         });
     }
@@ -163,6 +159,7 @@ class ArrayMap extends Phaser.Scene {
                 const decoration = Phaser.Math.RND.pick(['tree', 'building']);
                 const decorationImage = this.add.image(x * this.tileSize, y * this.tileSize, decoration).setOrigin(0);
                 decorationImage.setScale(0.5);
+                this.tileContainer.add(decorationImage);
             }
         }
     }
